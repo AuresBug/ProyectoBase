@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Exists;
 
 class FilesController extends Controller
 {
@@ -38,20 +39,33 @@ class FilesController extends Controller
      * @param $disk
      * @param $group
      */
-    public static function saveFile($file, $model, $disk = 'private', $group = 'default')
+    public static function saveFile($file, $model, $disk = 'private', $group = 'default', $name = null)
     {
         try {
 
+            if (($name)) {
+
+                $count = 1;
+
+                do {
+                    $name_to_save = Str::slug($name) . '_' . Str::random($count);
+                    $count++;
+                } while (Media::where('name', $name_to_save)->exists());
+
+                $name = $name_to_save;
+
+            }
+
             $media = MediaUploader::fromFile($file)
-                ->useFileName(Str::random(64) . '.' . $file->getClientOriginalExtension())
-                ->useName(Str::random(64))
+                ->useFileName(($name ?? Str::random(64)) . '.' . $file->getClientOriginalExtension())
+                ->useName(($name ?? Str::random(64)))
                 ->toDisk($disk)
                 ->upload();
 
             $model->attachMedia($media, $group);
 
             return true;
-        } catch (\Throwable$th) {
+        } catch (\Throwable $th) {
 
             logger($th);
 
