@@ -13,7 +13,7 @@ class UpdateRoleRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return true; // Cambiar si deseas implementar autorización específica
     }
 
     /**
@@ -24,8 +24,21 @@ class UpdateRoleRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'          => 'required|string',
-            'permissions.*' => 'required|exists:permissions,id',
+            'name' => 'required|string|max:255|unique:roles,name,' . $this->role->id, // Verifica que el nombre sea único, excluyendo el rol que se está actualizando
+            'permissions.*' => 'required|exists:permissions,id',                      // Verifica que cada permiso exista en la tabla de permisos
+        ];
+    }
+
+    /**
+     * Get custom attribute names for validation.
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            'name'          => 'nombre',
+            'permissions.*' => 'permisos',
         ];
     }
 }

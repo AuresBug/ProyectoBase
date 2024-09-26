@@ -17,7 +17,7 @@ class UserPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        // Permite ver cualquier usuario si tiene el permiso 'users.index'
         return $user->can('users.index');
     }
 
@@ -30,8 +30,8 @@ class UserPolicy
      */
     public function view(User $user, User $model)
     {
+        // Permite ver un usuario específico si tiene el permiso 'users.show'
         return $user->can('users.show');
-        // return true;
     }
 
     /**
@@ -42,8 +42,8 @@ class UserPolicy
      */
     public function create(User $user)
     {
+        // Permite crear un usuario si tiene el permiso 'users.create'
         return $user->can('users.create');
-        //
     }
 
     /**
@@ -55,9 +55,8 @@ class UserPolicy
      */
     public function update(User $user, User $model)
     {
-        //
+        // Permite actualizar un usuario si tiene el permiso 'users.edit'
         return $user->can('users.edit');
-
     }
 
     /**
@@ -69,9 +68,8 @@ class UserPolicy
      */
     public function delete(User $user, User $model)
     {
-        //
-        return $user->can('users.destroy') && $user->id != $model->id;
-
+        // Permite eliminar un usuario si tiene el permiso 'users.destroy' y no está intentando eliminarse a sí mismo
+        return $user->can('users.destroy') && $user->id !== $model->id;
     }
 
     /**
@@ -83,8 +81,8 @@ class UserPolicy
      */
     public function restore(User $user, User $model)
     {
+        // Permite restaurar un usuario si tiene el permiso 'users.destroy'
         return $user->can('users.destroy');
-        //
     }
 
     /**
@@ -96,8 +94,7 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $model)
     {
-        //
+        // Permite eliminar permanentemente un usuario si tiene el permiso 'users.destroy'
         return $user->can('users.destroy');
-
     }
 }

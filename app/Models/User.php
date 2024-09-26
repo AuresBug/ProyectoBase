@@ -15,9 +15,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements Auditable
 {
-
-    use \OwenIt\Auditing\Auditable;
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, HasMedia;
+    use \OwenIt\Auditing\Auditable, HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, HasMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -50,12 +48,19 @@ class User extends Authenticatable implements Auditable
     ];
 
     /**
+     * Automatically load relationships.
+     *
      * @var array
      */
     protected $with = [
         'media',
     ];
 
+    /**
+     * Get the avatar for the user or return a default one if not available.
+     *
+     * @return string
+     */
     public function avatar()
     {
         $media = $this->getMedia('avatar')->last();
@@ -64,59 +69,84 @@ class User extends Authenticatable implements Auditable
             return asset('images/default-avatar.jpeg');
         }
 
-        $avatar = $media->name ?: null;
-
-        return route('getFile', [$avatar, 'avatar']);
+        return route('getFile', [$media->name, 'avatar']);
     }
 
-/* -------------------------------------------------------------------------- */
-/*                                  Socialite                                 */
-/* -------------------------------------------------------------------------- */
+    /* -------------------------------------------------------------------------- */
+    /*                                  Socialite                                 */
+    /* -------------------------------------------------------------------------- */
 
     /**
-     * @return mixed
+     * Get the social profiles associated with the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function social_profiles()
+    public function socialProfiles()
     {
         return $this->hasMany(SocialProfile::class);
     }
 
-/* -------------------------------------------------------------------------- */
-/*                                 AdminLTE                                 */
-/* -------------------------------------------------------------------------- */
+    /* -------------------------------------------------------------------------- */
+    /*                                 AdminLTE                                   */
+    /* -------------------------------------------------------------------------- */
 
+    /**
+     * Get the AdminLTE image.
+     *
+     * @return string
+     */
     public function adminlte_image()
     {
-        return auth()->user()->avatar();
+        return $this->avatar();
     }
 
+    /**
+     * Get the AdminLTE description.
+     *
+     * @return string
+     */
     public function adminlte_desc()
     {
-        return 'That\'s a nice guy';
+        return 'That\'s a nice guy'; // Consider personalizing this dynamically based on the user's role or data
     }
 
+    /**
+     * Get the AdminLTE profile URL.
+     *
+     * @return string
+     */
     public function adminlte_profile_url()
     {
+        // return route('profile.show', auth()->user()->id); // Dynamic profile URL
+
         return 'profile/username';
+
     }
 
-/* -------------------------------------------------------------------------- */
-/*                                 Media Library  Auresbug/media                                 */
-/* -------------------------------------------------------------------------- */
+    /* -------------------------------------------------------------------------- */
+    /*                              Media Library                                 */
+    /* -------------------------------------------------------------------------- */
 
+    /**
+     * Register media groups and perform conversions.
+     *
+     * @return void
+     */
     public function registerMediaGroups()
     {
         $this->addMediaGroup('avatar')
             ->performConversions('avatar');
     }
 
-/* -------------------------------------------------------------------------- */
-/*                                 LaraTables                                 */
-/* -------------------------------------------------------------------------- */
+    /* -------------------------------------------------------------------------- */
+    /*                                 LaraTables                                 */
+    /* -------------------------------------------------------------------------- */
 
     /**
-     * @param  $query
-     * @return mixed
+     * Custom query conditions for Laratables.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder   $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public static function laratablesQueryConditions($query)
     {
@@ -124,7 +154,10 @@ class User extends Authenticatable implements Auditable
     }
 
     /**
-     * @param $user
+     * Custom actions for Laratables.
+     *
+     * @param  \App\Models\User $user
+     * @return string
      */
     public static function laratablesCustomAction($user)
     {
@@ -132,7 +165,10 @@ class User extends Authenticatable implements Auditable
     }
 
     /**
-     * @param $user
+     * Custom name column for Laratables.
+     *
+     * @param  \App\Models\User $user
+     * @return string
      */
     public static function laratablesCustomName($user)
     {
@@ -140,9 +176,9 @@ class User extends Authenticatable implements Auditable
     }
 
     /**
-     * Additional columns to be loaded for datatables.
+     * Additional columns to be loaded for Laratables.
      *
-     * @return array
+     * @return array<string>
      */
     public static function laratablesAdditionalColumns()
     {

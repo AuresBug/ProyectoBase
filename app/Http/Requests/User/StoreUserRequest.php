@@ -24,12 +24,28 @@ class StoreUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'     => 'required|string',
-            'email'    => 'required|unique:users,email',
-            'password' => 'sometimes|confirmed',
-            'avatar'   => 'sometimes|mimes:png,jpg',
-            'roles.*'   => 'required|exists:roles,id',
-
+            'name' => 'required|string|max:255',                      // Limita la longitud del nombre
+            'email' => 'required|email|unique:users,email|max:255',   // Asegura un formato de email válido y evita duplicados
+            'password' => 'nullable|min:8|confirmed',                 // La contraseña es opcional, pero debe tener al menos 8 caracteres
+            'avatar' => 'nullable|image|mimes:png,jpg,jpeg|max:2048', // Verifica que el archivo sea una imagen y limita el tamaño a 2MB
+            'roles.*' => 'required|exists:roles,id',                  // Asegura que cada rol seleccionado existe en la base de datos
         ];
     }
+
+    /**
+     * Get custom attribute names for validation.
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            'name'     => 'nombre',
+            'email'    => 'correo electrónico',
+            'password' => 'contraseña',
+            'avatar'   => 'avatar',
+            'roles.*'  => 'roles',
+        ];
+    }
+
 }
